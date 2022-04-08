@@ -3,6 +3,13 @@ import shutil
 
 
 class Cleaner:
+     """
+    Cleaner class will take one or two arguments
+
+    filePath: Enter your file path wich you want to delete.
+    directoryPath: Enter your directory path wich you want to delete, 
+    it will delete that directory and all of its children files.
+    """
     def __init__(self, filePath=None, directoryPath=None):
         self.filePath = filePath
         self.directoryPath = directoryPath

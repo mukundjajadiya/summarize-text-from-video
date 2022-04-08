@@ -10,6 +10,16 @@ from .Cleaner import Cleaner
 
 
 class ExtractTextFromVideo:
+    """
+    ExtractTextFromVideo class will take atleast videoFilePath  as parameter.
+
+    VideoFilePAth = Enter yout target video file path. which you want to extract text from video.
+
+    summurisePercentage = By default percentage value is 0.25 (25 %). it will summarize youre text in that ratio.
+
+    writeOutputText = By default value is False. if you want to write output text in to a file then you can set this parameter to True.
+    """
+    
     def __init__(self, videoFilePath, summurisePercentage=0.25, writeOutputText = False):
         self.videoFilePath = videoFilePath
         self.summurisePercentage = summurisePercentage
