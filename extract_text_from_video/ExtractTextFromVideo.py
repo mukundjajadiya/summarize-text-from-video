@@ -15,23 +15,22 @@ class ExtractTextFromVideo:
 
     VideoFilePAth = Enter yout target video file path. which you want to extract text from video.
 
-    summurisePercentage = By default percentage value is 0.25 (25 %). it will summarize youre text in that ratio.
+    summarizePercentage = By default percentage value is 0.25 (25 %). it will summarize youre text in that ratio.
 
     writeOutputText = By default value is False. if you want to write output text in to a file then you can set this parameter to True.
     """
-    
-    def __init__(self, videoFilePath, summurisePercentage=0.25, writeOutputText = False):
+
+    def __init__(self, videoFilePath, summarizePercentage=0.25, writeOutputText=False):
         self.videoFilePath = videoFilePath
-        self.summurisePercentage = summurisePercentage
+        self.summarizePercentage = summarizePercentage
         self.videoFileName = self.videoFilePath.split("/")[-1].split(".")[0]
         self.outputAudioDirectory = os.path.join("", "audio")
 
         self.outputAudioFileName = self.videoToAudio(
             videoFilePath=self.videoFilePath, audioDirectoryPath=self.outputAudioDirectory)
         self.videoText = self.audioToText(self.outputAudioFileName)
-        self.textSummary = self.summuriseText(
-            self.videoText, self.summurisePercentage)
-
+        self.textSummary = self.summarizeText(
+            self.videoText, self.summarizePercentage)
         if writeOutputText:
             self.writeTextToFile(
                 text=self.videoText, fileName=f"{self.videoFileName}_text.txt"
@@ -39,9 +38,11 @@ class ExtractTextFromVideo:
             self.writeTextToFile(
                 text=self.textSummary, fileName=f"{self.videoFileName}_text_summary.txt"
             )
-            
+        Cleaner(directoryPath=self.outputAudioDirectory)
+        print(f"[OUTPUT] VideoText: \n{self.videoText}\n\n")
+        print(f"[OUTPUT] VideoTextSummary: \n{self.textSummary}\n\n")
+
         # delete all unnecessary files
-        Cleaner(directoryPath = self.outputAudioDirectory)
 
     def videoToAudio(self, videoFilePath, audioDirectoryPath="audio"):
         try:
@@ -82,14 +83,13 @@ class ExtractTextFromVideo:
                 audio_data = r.record(source)
                 print(f"[INFO] Generating text from audio...")
                 text = r.recognize_google(audio_data)
-                print(f"[INFO] Done, Generating text from audio.")
-                print(f"[OUTPUT] {self.videoFileName} to text : \n")
+                print(f"[INFO] Done.")
                 return text
 
         except Exception as e:
             print(f"[ERROR] {e}")
 
-    def summuriseText(self, text, percentage):
+    def summarizeText(self, text, percentage):
         try:
             print("[INFO] NLP Model is loading...")
             nlp = en_core_web_sm.load()

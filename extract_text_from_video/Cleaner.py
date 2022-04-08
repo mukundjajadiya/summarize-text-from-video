@@ -3,7 +3,7 @@ import shutil
 
 
 class Cleaner:
-     """
+    """
     Cleaner class will take one or two arguments
 
     filePath: Enter your file path wich you want to delete.
