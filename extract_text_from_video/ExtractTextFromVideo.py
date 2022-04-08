@@ -1,5 +1,6 @@
 import os
 import moviepy.editor as mp
+from pydantic import DirectoryPath
 import speech_recognition as sr
 from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
@@ -9,22 +10,28 @@ from .Cleaner import Cleaner
 
 
 class ExtractTextFromVideo:
-    def __init__(self, videoFilePath, summurisePercentage=0.25):
+    def __init__(self, videoFilePath, summurisePercentage=0.25, writeOutputText = False):
         self.videoFilePath = videoFilePath
         self.summurisePercentage = summurisePercentage
         self.videoFileName = self.videoFilePath.split("/")[-1].split(".")[0]
-        self.outputAudioFileName = self.videoToAudio(self.videoFilePath)
-        self.videoText = self.audioToText(self.outputAudioFileName)
-        self.textSummary = self.summuriseText(self.videoText, self.summurisePercentage)
+        self.outputAudioDirectory = os.path.join("", "audio")
 
-        self.writeTextToFile(
-            text=self.videoText, fileName=f"{self.videoFileName}_text.txt"
-        )
-        self.writeTextToFile(
-            text=self.textSummary, fileName=f"{self.videoFileName}_text_summary.txt"
-        )
+        self.outputAudioFileName = self.videoToAudio(
+            videoFilePath=self.videoFilePath, audioDirectoryPath=self.outputAudioDirectory)
+        self.videoText = self.audioToText(self.outputAudioFileName)
+        self.textSummary = self.summuriseText(
+            self.videoText, self.summurisePercentage)
+
+        if writeOutputText:
+            self.writeTextToFile(
+                text=self.videoText, fileName=f"{self.videoFileName}_text.txt"
+            )
+            self.writeTextToFile(
+                text=self.textSummary, fileName=f"{self.videoFileName}_text_summary.txt"
+            )
+            
         # delete all unnecessary files
-        Cleaner(self.outputAudioFileName)
+        Cleaner(directoryPath = self.outputAudioDirectory)
 
     def videoToAudio(self, videoFilePath, audioDirectoryPath="audio"):
         try:
@@ -32,10 +39,12 @@ class ExtractTextFromVideo:
             videoFilename = videoFilePath.split("/")[-1].split(".")[0]
             outputAudioFileName = f"{videoFilename}_output.wav"
 
-            outputAudioFilePath = os.path.join(audioDirectoryPath, outputAudioFileName)
+            outputAudioFilePath = os.path.join(
+                audioDirectoryPath, outputAudioFileName)
 
             if os.path.exists(outputAudioFilePath):
-                print(f"[INFO] Audio file of ({videoFilePath}) already exists.")
+                print(
+                    f"[INFO] Audio file of ({videoFilePath}) already exists.")
                 return outputAudioFilePath
 
             if not os.path.exists(audioDirectoryPath):
@@ -96,11 +105,13 @@ class ExtractTextFromVideo:
                 for word in sent:
                     if word.text.lower() in word_frequencies.keys():
                         if sent not in sentence_scores.keys():
-                            sentence_scores[sent] = word_frequencies[word.text.lower()]
+                            sentence_scores[sent] = word_frequencies[word.text.lower(
+                            )]
                         else:
                             sentence_scores[sent] += word_frequencies[word.text.lower()]
             select_length = int(len(sentence_tokens) * percentage)
-            summary = nlargest(select_length, sentence_scores, key=sentence_scores.get)
+            summary = nlargest(select_length, sentence_scores,
+                               key=sentence_scores.get)
             final_summary = [word.text for word in summary]
             print("[INFO] Done.")
             summary = "".join(final_summary)
